@@ -93,33 +93,33 @@ export default HorizontalScrollCarousel;
 
 const cards = [
   {
-    url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-    title: "Language Courses",
-    description: "Interactive lessons for all levels",
+    url: "https://images.unsplash.com/photo-1571498664957-fde285d79857?q=80&w=627&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    title: "Personal Language Courses",
+    description: "Interactive lessons I design just for you",
     id: 1,
   },
   {
-    url: "https://images.unsplash.com/photo-1541178735493-479c1a27ed24?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-    title: "Cultural Events",
-    description: "Immerse yourself in traditions",
+    url: "https://images.unsplash.com/photo-1592487501226-7ed5e5dc80f2?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    title: "Cultural Immersion Events",
+    description: "Let me introduce you to traditions and customs",
     id: 2,
   },
   {
     url: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-    title: "Group Sessions",
-    description: "Learn together with peers",
+    title: "Supportive Group Sessions",
+    description: "Learn together in my welcoming community",
     id: 3,
   },
   {
     url: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-    title: "Private Tutoring",
-    description: "Personalized 1-on-1 lessons",
+    title: "One-on-One Tutoring",
+    description: "Personalized lessons focused entirely on you",
     id: 4,
   },
   {
     url: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-    title: "Online Resources",
-    description: "Access materials anytime",
+    title: "Learning Resources",
+    description: "Access my materials and guidance anytime",
     id: 5,
   },
 ];

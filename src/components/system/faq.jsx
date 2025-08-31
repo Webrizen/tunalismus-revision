@@ -5,7 +5,7 @@ const faqs = [
   {
     question: "Do I need any prior experience to join?",
     answer:
-      "Not at all! Whether you’re a complete beginner or looking to improve, our lessons are tailored to meet you where you are.",
+      "Not at all! Whether you're a complete beginner or looking to improve, our lessons are tailored to meet you where you are.",
   },
   {
     question: "Are classes online or in-person?",
@@ -42,12 +42,37 @@ export default function FAQ() {
   };
 
   return (
-    <section className="py-20 bg-[var(--color-dusty-rose)]">
-      <div className="max-w-4xl mx-auto px-5 sm:px-10 md:px-12 space-y-12">
-        <h2 className="text-3xl md:text-[6rem] font-bold text-center mb-6 text-[var(--color-muted-green)] invert">
+    <section className="py-20 bg-[var(--color-dusty-rose)] relative overflow-hidden">
+      <div className="absolute inset-0 opacity-10 z-0">
+        <svg
+          width="100%"
+          height="100%"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <pattern
+              id="rhombusPattern"
+              width="40"
+              height="40"
+              patternUnits="userSpaceOnUse"
+            >
+              <path
+                d="M0,20 L20,0 L40,20 L20,40 Z"
+                fill="var(--color-muted-green)"
+                fillOpacity="0.2"
+              />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#rhombusPattern)" />
+        </svg>
+      </div>
+
+      {/* Content */}
+      <div className="max-w-4xl mx-auto px-5 sm:px-10 md:px-12 space-y-12 relative z-10">
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-6 text-[var(--color-muted-green)] invert">
           Frequently Asked Questions
         </h2>
-        <div className="space-y-6 relative z-50">
+        <div className="space-y-6">
           {faqs.map((faq, index) => (
             <div
               key={index}
@@ -61,7 +86,7 @@ export default function FAQ() {
               aria-label={faq.question}
             >
               <div className="flex justify-between items-center p-5">
-                <h3 className="text-lg font-medium text-gray-800">{faq.question}</h3>
+                <h3 className="text-md font-medium text-gray-800">{faq.question}</h3>
                 <span className={`transform transition-transform duration-300 ${openIndex === index ? "rotate-45" : "rotate-0"}`}>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
