@@ -8,6 +8,7 @@ import TestimonialSection from '@/components/system/testimonial';
 import FAQ from '@/components/system/faq';
 import { TextAnimate } from '@/components/system/text-animate';
 import Link from 'next/link';
+import Globe3D from '../system/globe';
 
 export default function HomePage() {
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -270,9 +271,7 @@ export default function HomePage() {
               </div>
               {/* Center visual / illustration */}
               <div className="flex items-center justify-center order-3 md:col-span-2 lg:order-2 lg:row-span-2 lg:h-full">
-                <div className="flex-1 relative bg-gradient-to-tr from-[var(--color-soft-blue)]/30 to-[var(--color-muted-zinc)]/50 dark:from-[var(--color-soft-blue)]/20 dark:to-[var(--color-muted-zinc)]/30 p-6 rounded-lg aspect-[4/2.4] overflow-hidden">
-                  <img src="https://i.pinimg.com/1200x/36/81/03/368103532f3efe3056acdce308b6c0c0.jpg" alt="Language connection illustration" className="w-full h-auto" />
-                </div>
+                <Globe3D modelPath="/earth/scene.gltf" />
               </div>
               {/* Feature 2 */}
               <div className="order-1 grid gap-10 sm:grid-cols-2 md:order-2 md:grid-cols-1 lg:order-3">
