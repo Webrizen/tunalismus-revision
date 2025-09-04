@@ -1,58 +1,86 @@
 import { NextResponse } from "next/server";
 import Course from "../../../../models/Course";
-import connectToDB from "../../../../lib/mongodb";
+import { connectToDB } from "../../../../lib/mongodb";
 import { authorize } from "../../../../lib/auth";
 
 export async function GET(req, { params }) {
-  await connectToDB();
+  try {
+    await connectToDB();
 
-  const course = await Course.findById(params.id);
+    const course = await Course.findById(params.id);
 
-  if (!course) {
-    return NextResponse.json({ message: "Course not found" }, { status: 404 });
+    if (!course) {
+      return NextResponse.json({ message: "Course not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ course }, { status: 200 });
+  } catch (error) {
+    console.error(`Error in GET /api/courses/${params.id}:`, error);
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 }
+    );
   }
-
-  return NextResponse.json({ course }, { status: 200 });
 }
 
 export async function PUT(req, { params }) {
-  await connectToDB();
+  try {
+    await connectToDB();
 
-  const userRole = req.headers.get("X-User-Role");
+    const userRole = req.headers.get("X-User-Role");
 
-  if (!authorize("admin", userRole)) {
-    return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    if (!authorize("admin", userRole)) {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
+    const { title, description, level, durationWeeks, price } =
+      await req.json();
+
+    const updatedCourse = await Course.findByIdAndUpdate(
+      params.id,
+      { title, description, level, durationWeeks, price },
+      { new: true }
+    );
+
+    if (!updatedCourse) {
+      return NextResponse.json({ message: "Course not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ course: updatedCourse }, { status: 200 });
+  } catch (error) {
+    console.error(`Error in PUT /api/courses/${params.id}:`, error);
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 }
+    );
   }
-
-  const { title, description, level, durationWeeks, price } = await req.json();
-
-  const updatedCourse = await Course.findByIdAndUpdate(
-    params.id,
-    { title, description, level, durationWeeks, price },
-    { new: true }
-  );
-
-  if (!updatedCourse) {
-    return NextResponse.json({ message: "Course not found" }, { status: 404 });
-  }
-
-  return NextResponse.json({ course: updatedCourse }, { status: 200 });
 }
 
 export async function DELETE(req, { params }) {
-  await connectToDB();
+  try {
+    await connectToDB();
 
-  const userRole = req.headers.get("X-User-Role");
+    const userRole = req.headers.get("X-User-Role");
 
-  if (!authorize("admin", userRole)) {
-    return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    if (!authorize("admin", userRole)) {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
+    const deletedCourse = await Course.findByIdAndDelete(params.id);
+
+    if (!deletedCourse) {
+      return NextResponse.json({ message: "Course not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(
+      { message: "Course deleted successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error(`Error in DELETE /api/courses/${params.id}:`, error);
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 }
+    );
   }
-
-  const deletedCourse = await Course.findByIdAndDelete(params.id);
-
-  if (!deletedCourse) {
-    return NextResponse.json({ message: "Course not found" }, { status: 404 });
-  }
-
-  return NextResponse.json({ message: "Course deleted successfully" }, { status: 200 });
 }

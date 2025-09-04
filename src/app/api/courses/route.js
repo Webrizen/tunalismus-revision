@@ -1,41 +1,57 @@
 import { NextResponse } from "next/server";
 import Course from "../../../models/Course";
-import connectToDB from "../../../lib/mongodb";
+import { connectToDB } from "../../../lib/mongodb";
 import { authorize } from "../../../lib/auth";
 
 export async function POST(req) {
-  await connectToDB();
+  try {
+    await connectToDB();
 
-  const userRole = req.headers.get("X-User-Role");
+    const userRole = req.headers.get("X-User-Role");
 
-  if (!authorize("admin", userRole)) {
-    return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-  }
+    if (!authorize("admin", userRole)) {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
 
-  const { title, description, level, durationWeeks, price } = await req.json();
+    const { title, description, level, durationWeeks, price } = await req.json();
 
-  if (!title || !level || !durationWeeks || !price) {
+    if (!title || !level || !durationWeeks || !price) {
+      return NextResponse.json(
+        { message: "Title, level, duration, and price are required" },
+        { status: 400 }
+      );
+    }
+
+    const course = await Course.create({
+      title,
+      description,
+      level,
+      durationWeeks,
+      price,
+    });
+
+    return NextResponse.json({ course }, { status: 201 });
+  } catch (error) {
+    console.error("Error in POST /api/courses:", error);
     return NextResponse.json(
-      { message: "Title, level, duration, and price are required" },
-      { status: 400 }
+      { message: "Internal Server Error" },
+      { status: 500 }
     );
   }
-
-  const course = await Course.create({
-    title,
-    description,
-    level,
-    durationWeeks,
-    price,
-  });
-
-  return NextResponse.json({ course }, { status: 201 });
 }
 
 export async function GET(req) {
-  await connectToDB();
+  try {
+    await connectToDB();
 
-  const courses = await Course.find({});
+    const courses = await Course.find({});
 
-  return NextResponse.json({ courses }, { status: 200 });
+    return NextResponse.json({ courses }, { status: 200 });
+  } catch (error) {
+    console.error("Error in GET /api/courses:", error);
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
 }

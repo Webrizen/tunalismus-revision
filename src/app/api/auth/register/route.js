@@ -4,13 +4,10 @@ import User from "../../../../models/User";
 import { connectToDB } from "../../../../lib/mongodb";
 
 export async function POST(req) {
-  console.log("Register API called");
   try {
     await connectToDB();
-    console.log("DB connected");
 
     const { name, email, password, adminSecret } = await req.json();
-    console.log("Request body:", { name, email, adminSecret });
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -20,7 +17,6 @@ export async function POST(req) {
     }
 
     const existingUser = await User.findOne({ email });
-    console.log("Existing user:", existingUser);
 
     if (existingUser) {
       return NextResponse.json(
@@ -30,13 +26,11 @@ export async function POST(req) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log("Password hashed");
 
     let role = "student";
     if (adminSecret && adminSecret === process.env.ADMIN_CREATION_SECRET) {
       role = "admin";
     }
-    console.log("Role:", role);
 
     const user = await User.create({
       name,
@@ -44,7 +38,6 @@ export async function POST(req) {
       password: hashedPassword,
       role,
     });
-    console.log("User created:", user);
 
     return NextResponse.json({ user }, { status: 201 });
   } catch (error) {
