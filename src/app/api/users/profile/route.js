@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import User from "../../../../models/User";
-import dbConnect from "../../../../lib/mongodb";
+import connectToDB from "../../../../lib/mongodb";
 
 export async function GET(req) {
-  await dbConnect();
+  await connectToDB();
 
   const userId = req.headers.get("X-User-Id");
 
@@ -21,7 +21,7 @@ export async function GET(req) {
 }
 
 export async function PUT(req) {
-  await dbConnect();
+  await connectToDB();
 
   const userId = req.headers.get("X-User-Id");
 

@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import User from "../../../../models/User";
-import dbConnect from "../../../../lib/mongodb";
+import connectToDB from "../../../../lib/mongodb";
 
 export async function POST(req) {
-  await dbConnect();
+  await connectToDB();
 
   const { token, password } = await req.json();
 

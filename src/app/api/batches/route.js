@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import Batch from "../../../models/Batch";
-import dbConnect from "../../../lib/mongodb";
+import connectToDB from "../../../lib/mongodb";
 import { authorize } from "../../../lib/auth";
 
 export async function POST(req) {
-  await dbConnect();
+  await connectToDB();
 
   const userRole = req.headers.get("X-User-Role");
 
@@ -34,7 +34,7 @@ export async function POST(req) {
 }
 
 export async function GET(req) {
-  await dbConnect();
+  await connectToDB();
 
   const batches = await Batch.find({}).populate("course").populate("trainer", "name email");
 

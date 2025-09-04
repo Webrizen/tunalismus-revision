@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import User from "../../../../models/User";
-import dbConnect from "../../../../lib/mongodb";
+import { connectToDB } from "../../../../lib/mongodb";
 
 export async function POST(req) {
-  await dbConnect();
+  await connectToDB();
 
   const { email } = await req.json();
 

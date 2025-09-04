@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import Material from "../../../../models/Material";
-import dbConnect from "../../../../lib/mongodb";
+import connectToDB from "../../../../lib/mongodb";
 import { authorize } from "../../../../lib/auth";
 
 export async function DELETE(req, { params }) {
-  await dbConnect();
+  await connectToDB();
 
   const userRole = req.headers.get("X-User-Role");
 

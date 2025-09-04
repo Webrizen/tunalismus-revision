@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import Payment from "../../../../models/Payment";
-import dbConnect from "../../../../lib/mongodb";
+import connectToDB from "../../../../lib/mongodb";
 
 export async function GET(req) {
-  await dbConnect();
+  await connectToDB();
 
   const userId = req.headers.get("X-User-Id");
 

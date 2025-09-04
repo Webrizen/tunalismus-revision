@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import Course from "../../../../models/Course";
-import dbConnect from "../../../../lib/mongodb";
+import connectToDB from "../../../../lib/mongodb";
 import { authorize } from "../../../../lib/auth";
 
 export async function GET(req, { params }) {
-  await dbConnect();
+  await connectToDB();
 
   const course = await Course.findById(params.id);
 
@@ -16,7 +16,7 @@ export async function GET(req, { params }) {
 }
 
 export async function PUT(req, { params }) {
-  await dbConnect();
+  await connectToDB();
 
   const userRole = req.headers.get("X-User-Role");
 
@@ -40,7 +40,7 @@ export async function PUT(req, { params }) {
 }
 
 export async function DELETE(req, { params }) {
-  await dbConnect();
+  await connectToDB();
 
   const userRole = req.headers.get("X-User-Role");
 

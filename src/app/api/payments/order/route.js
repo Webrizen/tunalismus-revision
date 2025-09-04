@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import Course from "../../../../models/Course";
 import Payment from "../../../../models/Payment";
-import dbConnect from "../../../../lib/mongodb";
+import connectToDB from "../../../../lib/mongodb";
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -10,7 +10,7 @@ const razorpay = new Razorpay({
 });
 
 export async function POST(req) {
-  await dbConnect();
+  await connectToDB();
 
   const userId = req.headers.get("X-User-Id");
   const { courseId } = await req.json();

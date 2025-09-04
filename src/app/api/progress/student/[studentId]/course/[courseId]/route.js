@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import Progress from "../../../../../../../models/Progress";
-import dbConnect from "../../../../../../../lib/mongodb";
+import connectToDB from "../../../../../../../lib/mongodb";
 
 export async function GET(req, { params }) {
-  await dbConnect();
+  await connectToDB();
 
   const progress = await Progress.findOne({
     student: params.studentId,

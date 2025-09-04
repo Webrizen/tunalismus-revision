@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import User from "../../../../models/User";
-import dbConnect from "../../../../lib/mongodb";
+import connectToDB from "../../../../lib/mongodb";
 import { authorize } from "../../../../lib/auth";
 
 export async function POST(req) {
-  await dbConnect();
+  await connectToDB();
 
   const userRole = req.headers.get("X-User-Role");
 

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import Batch from "../../../../models/Batch";
-import dbConnect from "../../../../lib/mongodb";
+import connectToDB from "../../../../lib/mongodb";
 import { authorize } from "../../../../lib/auth";
 
 export async function GET(req, { params }) {
-  await dbConnect();
+  await connectToDB();
 
   const batch = await Batch.findById(params.id)
     .populate("course")
@@ -19,7 +19,7 @@ export async function GET(req, { params }) {
 }
 
 export async function PUT(req, { params }) {
-  await dbConnect();
+  await connectToDB();
 
   const userRole = req.headers.get("X-User-Role");
 
@@ -43,7 +43,7 @@ export async function PUT(req, { params }) {
 }
 
 export async function DELETE(req, { params }) {
-  await dbConnect();
+  await connectToDB();
 
   const userRole = req.headers.get("X-User-Role");
 

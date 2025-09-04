@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import Payment from "../../../../models/Payment";
-import dbConnect from "../../../../lib/mongodb";
+import connectToDB from "../../../../lib/mongodb";
 
 export async function POST(req) {
-  await dbConnect();
+  await connectToDB();
 
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = await req.json();
 
