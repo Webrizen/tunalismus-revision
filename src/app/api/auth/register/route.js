@@ -9,6 +9,9 @@ export async function POST(req) {
 
     const { name, email, password, adminSecret } = await req.json();
 
+    console.log("adminSecret from request:", adminSecret);
+    console.log("ADMIN_CREATION_SECRET from env:", process.env.ADMIN_CREATION_SECRET);
+
     if (!name || !email || !password) {
       return NextResponse.json(
         { message: "Name, email, and password are required" },
