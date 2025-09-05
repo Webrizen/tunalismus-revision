@@ -1,6 +1,5 @@
 import { Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/system/navbar";
 import { ThemeProvider } from "@/providers/theme-provider";
 
 const bricolage = Bricolage_Grotesque({
@@ -55,7 +54,7 @@ export default function RootLayout({ children }) {
           defaultTheme="system"
           enableSystem
         >
-          <Navbar />
+          
           {children}
         </ThemeProvider>
       </body>
