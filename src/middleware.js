@@ -12,46 +12,44 @@ export async function middleware(req) {
     "/api/auth/reset-password",
   ];
 
+  // Allow public paths
   if (publicPaths.includes(pathname)) {
     return NextResponse.next();
   }
 
+  // Allow login page and home page
   if (pathname.startsWith("/login") || pathname === "/") {
     return NextResponse.next();
   }
 
-  if (!token) {
-    if (pathname.startsWith("/admin")) {
-      return NextResponse.redirect(new URL("/login", req.url));
+  // For API routes, check authentication
+  if (pathname.startsWith("/api/")) {
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+
+    try {
+      const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+      const { payload } = await jose.jwtVerify(token, secret);
+
+      const requestHeaders = new Headers(req.headers);
+      requestHeaders.set("X-User-Id", payload.id);
+      requestHeaders.set("X-User-Role", payload.role);
+
+      return NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
+    } catch (error) {
+      return NextResponse.json({ message: "Invalid token" }, { status: 401 });
+    }
   }
 
-  try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-    const { payload } = await jose.jwtVerify(token, secret);
-
-    const requestHeaders = new Headers(req.headers);
-    requestHeaders.set("X-User-Id", payload.id);
-    requestHeaders.set("X-User-Role", payload.role);
-
-    if (pathname.startsWith("/admin") && payload.role !== "admin") {
-      return NextResponse.redirect(new URL("/login", req.url));
-    }
-
-    return NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
-  } catch (error) {
-    if (pathname.startsWith("/admin")) {
-      return NextResponse.redirect(new URL("/login", req.url));
-    }
-    return NextResponse.json({ message: "Invalid token" }, { status: 401 });
-  }
+  // For page routes, let the client-side RouteGuard handle authentication
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/api/:path*", "/admin/:path*", "/login", "/"],
+  matcher: ["/api/:path*", "/admin/:path*"],
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   Bell,
@@ -14,6 +14,9 @@ import {
   Search,
   ShoppingCart,
   Users,
+  LogOut,
+  Settings,
+  HelpCircle,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +38,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import RouteGuard from "@/components/system/route-guard";
 
 const navLinks = {
   admin: [
@@ -43,156 +47,192 @@ const navLinks = {
     { href: "/admin/courses", label: "Courses", icon: Package },
     { href: "/admin/batches", label: "Batches", icon: Package2 },
     { href: "/admin/payments", label: "Payments", icon: ShoppingCart },
+    { href: "/admin/analytics", label: "Analytics", icon: LineChart },
   ],
   trainer: [
     { href: "/trainer/dashboard", label: "Dashboard", icon: Home },
     { href: "/trainer/batches", label: "My Batches", icon: Package2 },
+    { href: "/trainer/analytics", label: "Performance", icon: LineChart },
   ],
   student: [
     { href: "/student/dashboard", label: "Dashboard", icon: Home },
     { href: "/student/courses", label: "My Courses", icon: Package },
+    { href: "/student/progress", label: "Progress", icon: LineChart },
   ],
 };
 
 export default function DashboardLayout({ children }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState(null);
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [activePath, setActivePath] = useState("");
 
+  // Set active path on route change
   useEffect(() => {
-    const verifyToken = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        router.push("/login");
-        return;
-      }
-
-      try {
-        const res = await fetch("/api/users/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (res.ok) {
-          const { user } = await res.json();
-          if (user.role === "admin") {
-            setUser(user);
-            setIsAuthorized(true);
-          } else {
-            router.push("/login");
-          }
-        } else {
-          router.push("/login");
-        }
-      } catch (error) {
-        router.push("/login");
-      }
-    };
-
-    verifyToken();
-  }, [router]);
+    setActivePath(pathname);
+  }, [pathname]);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("token");
+    }
     router.push("/login");
   };
 
-  if (!isAuthorized) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        Loading...
-      </div>
-    );
-  }
-
-  const userNavLinks = navLinks[user.role] || [];
+  // Get allowed roles from the current path
+  const getAllowedRoles = () => {
+    if (pathname.startsWith("/admin")) return ["admin"];
+    if (pathname.startsWith("/trainer")) return ["trainer", "admin"];
+    if (pathname.startsWith("/student")) return ["student", "trainer", "admin"];
+    return [];
+  };
 
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-      <div className="hidden border-r bg-muted/40 md:block">
-        <div className="flex h-full max-h-screen flex-col gap-2">
-          <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-            <Link href="/" className="flex items-center gap-2 font-semibold">
-              <Package2 className="h-6 w-6" />
-              <span className="">Tunalismus</span>
-            </Link>
-          </div>
-          <div className="flex-1">
-            <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-              {userNavLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-                >
-                  <link.icon className="h-4 w-4" />
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
+    <RouteGuard 
+      allowedRoles={getAllowedRoles()}
+      onAuthSuccess={(userData) => setUser(userData)}
+    >
+      <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] bg-background">
+        <div className="hidden border-r bg-muted/40 md:block dark:bg-gray-900/30">
+          <div className="flex h-full max-h-screen flex-col gap-2">
+            <div className="flex-1 overflow-auto py-2">
+              <nav className="grid items-start px-2 text-sm font-medium lg:px-4 gap-1">
+                {user && navLinks[user.role]?.map((link) => {
+                  const isActive = activePath === link.href;
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={`flex items-center gap-3 rounded-lg px-3 py-3 transition-all hover:bg-accent hover:text-accent-foreground ${
+                        isActive 
+                          ? "bg-primary text-primary-foreground font-medium" 
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      <link.icon className="h-5 w-5" />
+                      {link.label}
+                      {isActive && (
+                        <span className="ml-auto">
+                          <div className="h-2 w-2 rounded-full bg-primary-foreground"></div>
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
+            <div className="mt-auto p-4 border-t">
+              <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:text-foreground transition-colors">
+                <div className="flex flex-col">
+                  <p className="text-sm font-medium">{user?.name || user?.email}</p>
+                  <p className="text-xs capitalize text-muted-foreground">{user?.role}</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      <div className="flex flex-col">
-        <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="shrink-0 md:hidden"
-              >
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle navigation menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="flex flex-col">
-              <nav className="grid gap-2 text-lg font-medium">
-                <Link
-                  href="#"
-                  className="flex items-center gap-2 text-lg font-semibold"
+        <div className="flex flex-col">
+          <header className="flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6 sticky top-0 z-10">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="shrink-0 md:hidden"
                 >
-                  <Package2 className="h-6 w-6" />
-                  <span className="sr-only">Tunalismus</span>
-                </Link>
-                {userNavLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-                  >
-                    <link.icon className="h-5 w-5" />
-                    {link.label}
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Toggle navigation menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="flex flex-col p-0 bg-background">
+                <div className="flex h-14 items-center border-b px-4 lg:h-[60px]">
+                  <Link href="/" className="flex items-center gap-2 font-semibold">
+                    <Package2 className="h-6 w-6 text-primary" />
+                    <span className="text-xl font-bold">Tunalismus</span>
                   </Link>
-                ))}
-              </nav>
-            </SheetContent>
-          </Sheet>
-          <div className="w-full flex-1">
-            {/* Add header content here if needed */}
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary" size="icon" className="rounded-full">
-                <CircleUser className="h-5 w-5" />
-                <span className="sr-only">Toggle user menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Support</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </header>
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-          {children}
-        </main>
+                </div>
+                <div className="flex-1 overflow-auto py-2">
+                  <nav className="grid items-start px-2 text-sm font-medium gap-1">
+                    {user && navLinks[user.role]?.map((link) => {
+                      const isActive = activePath === link.href;
+                      return (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          className={`flex items-center gap-3 rounded-lg px-3 py-3 transition-all hover:bg-accent ${
+                            isActive 
+                              ? "bg-primary text-primary-foreground font-medium" 
+                              : "text-muted-foreground hover:text-accent-foreground"
+                          }`}
+                        >
+                          <link.icon className="h-5 w-5" />
+                          {link.label}
+                        </Link>
+                      );
+                    })}
+                  </nav>
+                </div>
+                <div className="mt-auto p-4 border-t">
+                  <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground">
+                    <div className="flex flex-col">
+                      <p className="text-sm font-medium">{user?.name || user?.email}</p>
+                      <p className="text-xs capitalize text-muted-foreground">{user?.role}</p>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    className="w-full mt-2 gap-2" 
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="secondary" size="icon" className="rounded-full">
+                  <CircleUser className="h-5 w-5" />
+                  <span className="sr-only">Toggle user menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 bg-background">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium">{user?.name || user?.email}</p>
+                    <p className="text-xs leading-none text-muted-foreground capitalize">
+                      {user?.role}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="cursor-pointer focus:bg-accent focus:text-accent-foreground">
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer focus:bg-accent focus:text-accent-foreground">
+                  <HelpCircle className="mr-2 h-4 w-4" />
+                  <span>Support</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  onClick={handleLogout}
+                  className="cursor-pointer focus:bg-accent focus:text-accent-foreground text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </header>
+          
+          <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-auto">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </RouteGuard>
   );
 }
