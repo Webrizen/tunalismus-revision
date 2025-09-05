@@ -37,8 +37,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import RouteGuard from "@/components/system/route-guard";
+import { ThemeToggleButton } from "@/components/ui/theme-toggle-button";
 
 const navLinks = {
   admin: [
@@ -150,6 +151,7 @@ export default function DashboardLayout({ children }) {
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="flex flex-col p-0 bg-background">
+                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                 <div className="flex h-14 items-center border-b px-4 lg:h-[60px]">
                   <Link href="/" className="flex items-center gap-2 font-semibold">
                     <Package2 className="h-6 w-6 text-primary" />
@@ -240,13 +242,15 @@ export default function DashboardLayout({ children }) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
                   onClick={handleLogout}
-                  className="cursor-pointer focus:bg-accent focus:text-accent-foreground text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
+                  className="cursor-pointer focus:bg-accent text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Logout</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            <ThemeToggleButton start="top-right" />
           </header>
           
           <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-auto">
