@@ -217,7 +217,7 @@ export default function BatchesPage() {
               Are you sure you want to delete this batch?
             </DialogDescription>
           </DialogHeader>
-          <div className="flex justify-end mt-4 space-x-2">
+          <div className="flex flex-col-reverse gap-2 mt-4 sm:flex-row sm:justify-end sm:space-x-2">
             <Button
               variant="ghost"
               onClick={() => setIsDeleteModalOpen(false)}

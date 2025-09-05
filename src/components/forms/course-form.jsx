@@ -158,7 +158,7 @@ export default function CourseForm({ course, onClose, onCourseUpdated }) {
             {formState.errors.root.message}
           </p>
         )}
-        <div className="flex justify-end space-x-2">
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:space-x-2">
           <Button type="button" variant="ghost" onClick={onClose}>
             Cancel
           </Button>

@@ -44,6 +44,12 @@ export async function GET(req) {
   try {
     await connectToDB();
 
+    const userRole = req.headers.get("X-User-Role");
+
+    if (!authorize("admin", userRole)) {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
     const courses = await Course.find({});
 
     return NextResponse.json({ courses }, { status: 200 });

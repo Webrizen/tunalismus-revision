@@ -49,12 +49,19 @@ export async function GET(req) {
   try {
     await connectToDB();
 
+    const userRole = req.headers.get("X-User-Role");
+
+    if (!authorize("admin", userRole)) {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
     const batches = await Batch.find({})
       .populate("course")
       .populate("trainer", "name email");
 
     return NextResponse.json({ batches }, { status: 200 });
-  } catch (error) {
+  } catch (error)
+  {
     console.error("Error in GET /api/batches:", error);
     return NextResponse.json(
       { message: "Internal Server Error" },
