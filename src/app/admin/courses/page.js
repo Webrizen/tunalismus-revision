@@ -54,13 +54,7 @@ export default function CoursesPage() {
   const fetchCourses = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch("/api/courses", {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await fetch("/api/courses");
       if (res.ok) {
         const { courses } = await res.json();
         setCourses(courses);
