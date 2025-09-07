@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { useAuth } from "@/providers/auth-provider";
 import {
   Bell,
   CircleUser,
@@ -43,29 +44,26 @@ import { ThemeToggleButton } from "@/components/ui/theme-toggle-button";
 
 const navLinks = {
   admin: [
-    { href: "/admin/dashboard", label: "Dashboard", icon: Home },
-    { href: "/admin/users", label: "Users", icon: Users },
-    { href: "/admin/courses", label: "Courses", icon: Package },
-    { href: "/admin/batches", label: "Batches", icon: Package2 },
-    { href: "/admin/payments", label: "Payments", icon: ShoppingCart },
-    { href: "/admin/analytics", label: "Analytics", icon: LineChart },
+    { href: "/dashboard", label: "Dashboard", icon: Home },
+    { href: "/dashboard/users", label: "Users", icon: Users },
+    { href: "/dashboard/courses", label: "Courses", icon: Package },
+    { href: "/dashboard/batches", label: "Batches", icon: Package2 },
+    { href: "/dashboard/payments", label: "Payments", icon: ShoppingCart },
   ],
   trainer: [
-    { href: "/trainer/dashboard", label: "Dashboard", icon: Home },
-    { href: "/trainer/batches", label: "My Batches", icon: Package2 },
-    { href: "/trainer/analytics", label: "Performance", icon: LineChart },
+    { href: "/dashboard", label: "Dashboard", icon: Home },
+    { href: "/dashboard/batches", label: "My Batches", icon: Package2 },
   ],
   student: [
-    { href: "/student/dashboard", label: "Dashboard", icon: Home },
-    { href: "/student/courses", label: "My Courses", icon: Package },
-    { href: "/student/progress", label: "Progress", icon: LineChart },
+    { href: "/dashboard", label: "Dashboard", icon: Home },
+    { href: "/dashboard/courses", label: "My Courses", icon: Package },
+    { href: "/dashboard/progress", label: "Progress", icon: LineChart },
   ],
 };
 
 export default function DashboardLayout({ children }) {
-  const router = useRouter();
+  const { user, logout } = useAuth();
   const pathname = usePathname();
-  const [user, setUser] = useState(null);
   const [activePath, setActivePath] = useState("");
 
   // Set active path on route change
@@ -74,24 +72,18 @@ export default function DashboardLayout({ children }) {
   }, [pathname]);
 
   const handleLogout = () => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("token");
-    }
-    router.push("/login");
+    logout();
   };
 
   // Get allowed roles from the current path
   const getAllowedRoles = () => {
-    if (pathname.startsWith("/admin")) return ["admin"];
-    if (pathname.startsWith("/trainer")) return ["trainer", "admin"];
-    if (pathname.startsWith("/student")) return ["student", "trainer", "admin"];
+    if (pathname.startsWith("/dashboard")) return ["admin", "trainer", "student"];
     return [];
   };
 
   return (
     <RouteGuard 
       allowedRoles={getAllowedRoles()}
-      onAuthSuccess={(userData) => setUser(userData)}
     >
       <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] bg-background">
         <div className="hidden border-r bg-muted/40 md:block dark:bg-gray-900/30">

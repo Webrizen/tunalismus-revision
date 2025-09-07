@@ -1,6 +1,7 @@
 import { Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
+import { AuthProvider } from "@/providers/auth-provider";
 
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -54,8 +55,9 @@ export default function RootLayout({ children }) {
           defaultTheme="system"
           enableSystem
         >
-          
-          {children}
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

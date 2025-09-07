@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -41,6 +42,7 @@ function UserRowSkeleton() {
 }
 
 export default function UsersPage() {
+  const { user } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -76,6 +78,7 @@ export default function UsersPage() {
 
   const handleUserInvited = () => {
     fetchUsers();
+    setIsModalOpen(false);
   };
 
   if (error) {
@@ -91,23 +94,25 @@ export default function UsersPage() {
     <div>
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">User Management</h1>
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogTrigger asChild>
-            <Button>Invite User</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Invite New User</DialogTitle>
-              <DialogDescription>
-                Enter the details of the new user to send an invitation.
-              </DialogDescription>
-            </DialogHeader>
-            <InviteUserForm
-              onClose={() => setIsModalOpen(false)}
-              onUserInvited={handleUserInvited}
-            />
-          </DialogContent>
-        </Dialog>
+        {user?.role === 'admin' && (
+          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogTrigger asChild>
+              <Button>Invite User</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Invite New User</DialogTitle>
+                <DialogDescription>
+                  Enter the details of the new user to send an invitation.
+                </DialogDescription>
+              </DialogHeader>
+              <InviteUserForm
+                onClose={() => setIsModalOpen(false)}
+                onUserInvited={handleUserInvited}
+              />
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
       <div className="mt-4">
         <Table>

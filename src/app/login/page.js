@@ -13,8 +13,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Loader2, CheckCircle } from "lucide-react";
+import { useAuth } from "@/providers/auth-provider";
 
 export default function LoginPage() {
+  const auth = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
@@ -24,18 +26,26 @@ export default function LoginPage() {
   const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
 
-  // Fix for localStorage access in Next.js
   useEffect(() => {
     setIsMounted(true);
-    
-    // Check if user is already logged in
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token");
-      if (token) {
-        router.push('/admin/dashboard');
+    // Redirect if user is already authenticated
+    if (auth.isAuthenticated) {
+      const { user } = auth;
+      switch (user.role) {
+        case 'admin':
+          router.push('/admin/dashboard');
+          break;
+        case 'trainer':
+          router.push('/trainer/dashboard');
+          break;
+        case 'student':
+          router.push('/student/dashboard');
+          break;
+        default:
+          router.push('/');
       }
     }
-  }, [router]);
+  }, [auth, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,38 +62,30 @@ export default function LoginPage() {
       });
 
       const responseData = await res.json();
-      
+
       if (res.ok) {
-        // Extract token from response - handle both direct token and nested token
         const token = responseData.token || (responseData.data && responseData.data.token);
-        
         if (!token) {
           throw new Error("No token received from server");
         }
 
-        if (isMounted) {
-          localStorage.setItem("token", token);
-          setIsSuccess(true);
-          
-          // Show success message for a moment before redirecting
-          setTimeout(() => {
-            router.push('/admin/dashboard');
-          }, 1000);
-        }
+        setIsSuccess(true);
+
+        // Use the login function from context
+        // Add a small delay to allow the success UI to be seen
+        setTimeout(() => {
+          auth.login(token);
+        }, 1000);
+
       } else {
-        // Handle different error response formats
-        const errorMessage = responseData.message || 
-                            responseData.error || 
-                            "Invalid email or password. Please try again.";
+        const errorMessage = responseData.message || responseData.error || "Invalid credentials.";
         setError(errorMessage);
+        setIsLoading(false);
       }
     } catch (error) {
       console.error("Login error:", error);
-      setError(error.message || "Network error. Please check your connection and try again.");
-    } finally {
-      if (isMounted) {
-        setIsLoading(false);
-      }
+      setError(error.message || "A network error occurred.");
+      setIsLoading(false);
     }
   };
 
@@ -236,14 +238,11 @@ export default function LoginPage() {
               )}
             </Button>
           </form>
-          <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-            <span>Don't have an account? </span>
-            <button
-              className="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium"
-              onClick={() => router.push('/signup')}
-            >
-              Contact administrator
-            </button>
+          <div className="mt-4 text-center text-sm">
+            Don&apos;t have an account?{" "}
+            <Link href="/signup" className="underline">
+              Sign up
+            </Link>
           </div>
         </CardContent>
       </Card>

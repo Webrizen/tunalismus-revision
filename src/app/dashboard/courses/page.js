@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -16,27 +17,25 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
-import BatchForm from "@/components/forms/batch-form";
+import CourseForm from "@/components/forms/course-form";
 import { Skeleton } from "@/components/ui/skeleton";
 
-function BatchRowSkeleton() {
+function CourseRowSkeleton() {
   return (
     <TableRow>
       <TableCell>
         <Skeleton className="h-4 w-40" />
       </TableCell>
       <TableCell>
-        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-4 w-12" />
       </TableCell>
       <TableCell>
         <Skeleton className="h-4 w-24" />
       </TableCell>
       <TableCell>
-        <Skeleton className="h-4 w-24" />
-      </TableCell>
-      <TableCell>
-        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-4 w-20" />
       </TableCell>
       <TableCell>
         <Skeleton className="h-10 w-24" />
@@ -45,29 +44,31 @@ function BatchRowSkeleton() {
   );
 }
 
-export default function BatchesPage() {
-  const [batches, setBatches] = useState([]);
+export default function CoursesPage() {
+  const { user } = useAuth();
+  const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedBatch, setSelectedBatch] = useState(null);
+  const [selectedCourse, setSelectedCourse] = useState(null);
 
-  const fetchBatches = async () => {
+  const fetchCourses = async () => {
     setLoading(true);
+    const endpoint = user?.role === 'student' ? '/api/student/courses' : '/api/courses';
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("/api/batches", {
+      const res = await fetch(endpoint, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       if (res.ok) {
-        const { batches } = await res.json();
-        setBatches(batches);
+        const { courses } = await res.json();
+        setCourses(courses);
       } else {
         const { message } = await res.json();
-        setError(message || "Failed to fetch batches.");
+        setError(message || "Failed to fetch courses.");
       }
     } catch (error) {
       setError("An unexpected error occurred.");
@@ -77,30 +78,32 @@ export default function BatchesPage() {
   };
 
   useEffect(() => {
-    fetchBatches();
-  }, []);
+    if (user) {
+      fetchCourses();
+    }
+  }, [user]);
 
   const handleCreate = () => {
-    setSelectedBatch(null);
+    setSelectedCourse(null);
     setIsModalOpen(true);
   };
 
-  const handleEdit = (batch) => {
-    setSelectedBatch(batch);
+  const handleEdit = (course) => {
+    setSelectedCourse(course);
     setIsModalOpen(true);
   };
 
-  const handleDelete = (batch) => {
-    setSelectedBatch(batch);
+  const handleDelete = (course) => {
+    setSelectedCourse(course);
     setIsDeleteModalOpen(true);
   };
 
   const confirmDelete = async () => {
-    if (!selectedBatch) return;
+    if (!selectedCourse) return;
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`/api/batches/${selectedBatch._id}`, {
+      const res = await fetch(`/api/courses/${selectedCourse._id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -108,27 +111,27 @@ export default function BatchesPage() {
       });
 
       if (res.ok) {
-        fetchBatches();
+        fetchCourses();
         setIsDeleteModalOpen(false);
-        setSelectedBatch(null);
+        setSelectedCourse(null);
       } else {
         const { message } = await res.json();
-        setError(message || "Failed to delete batch.");
+        setError(message || "Failed to delete course.");
       }
     } catch (error) {
       setError("An unexpected error occurred.");
     }
   };
 
-  const handleBatchUpdated = () => {
-    fetchBatches();
+  const handleCourseUpdated = () => {
+    fetchCourses();
     setIsModalOpen(false);
   };
 
   if (error) {
     return (
       <div>
-        <h1 className="text-3xl font-bold">Batch Management</h1>
+        <h1 className="text-3xl font-bold">Course Management</h1>
         <p className="mt-4 text-red-600">{error}</p>
       </div>
     );
@@ -137,75 +140,75 @@ export default function BatchesPage() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Batch Management</h1>
-        <Button onClick={handleCreate}>Create Batch</Button>
+        <h1 className="text-3xl font-bold">
+          {user?.role === 'student' ? 'My Courses' : 'Course Management'}
+        </h1>
+        {user?.role === 'admin' && (
+          <Button onClick={handleCreate}>Create Course</Button>
+        )}
       </div>
       <div className="mt-4">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Course</TableHead>
-              <TableHead>Trainer</TableHead>
-              <TableHead>Start Date</TableHead>
-              <TableHead>End Date</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead>Title</TableHead>
+              <TableHead>Level</TableHead>
+              <TableHead>Duration (Weeks)</TableHead>
+              <TableHead>Price</TableHead>
+              {user?.role === 'admin' && <TableHead>Actions</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading
               ? Array.from({ length: 5 }).map((_, i) => (
-                  <BatchRowSkeleton key={i} />
+                  <CourseRowSkeleton key={i} />
                 ))
-              : batches.map((batch) => (
-                  <TableRow key={batch._id}>
-                    <TableCell>{batch.name}</TableCell>
-                    <TableCell>{batch.course.title}</TableCell>
-                    <TableCell>{batch.trainer.name}</TableCell>
-                    <TableCell>
-                      {new Date(batch.startDate).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(batch.endDate).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mr-2"
-                        onClick={() => handleEdit(batch)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDelete(batch)}
-                      >
-                        Delete
-                      </Button>
-                    </TableCell>
+              : courses.map((course) => (
+                  <TableRow key={course._id}>
+                    <TableCell>{course.title}</TableCell>
+                    <TableCell>{course.level}</TableCell>
+                    <TableCell>{course.durationWeeks}</TableCell>
+                    <TableCell>{course.price}</TableCell>
+                    {user?.role === 'admin' && (
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mr-2"
+                          onClick={() => handleEdit(course)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDelete(course)}
+                        >
+                          Delete
+                        </Button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
           </TableBody>
         </Table>
       </div>
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {selectedBatch ? "Edit Batch" : "Create Batch"}
+              {selectedCourse ? "Edit Course" : "Create Course"}
             </DialogTitle>
             <DialogDescription>
-              {selectedBatch
-                ? "Edit the details of the batch."
-                : "Enter the details of the new batch."}
+              {selectedCourse
+                ? "Edit the details of the course."
+                : "Enter the details of the new course."}
             </DialogDescription>
           </DialogHeader>
-          <BatchForm
-            batch={selectedBatch}
+          <CourseForm
+            course={selectedCourse}
             onClose={() => setIsModalOpen(false)}
-            onBatchUpdated={handleBatchUpdated}
+            onCourseUpdated={handleCourseUpdated}
           />
         </DialogContent>
       </Dialog>
@@ -214,7 +217,7 @@ export default function BatchesPage() {
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this batch?
+              Are you sure you want to delete this course?
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end mt-4 space-x-2">

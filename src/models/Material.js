@@ -7,7 +7,6 @@ const MaterialSchema = new mongoose.Schema(
     type: { type: String, enum: ["pdf", "video", "doc", "link"], default: "pdf" },
     course: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
     batch: { type: mongoose.Schema.Types.ObjectId, ref: "Batch" },
-    uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   },
   { timestamps: true }
 );

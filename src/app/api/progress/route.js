@@ -40,3 +40,29 @@ export async function POST(req) {
     );
   }
 }
+
+export async function GET(req) {
+  try {
+    await connectToDB();
+
+    const userRole = req.headers.get("X-User-Role");
+    const userId = req.headers.get("X-User-Id");
+
+    if (!authorize("student", userRole)) {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
+    const progress = await Progress.find({ student: userId }).populate(
+      "course",
+      "title"
+    );
+
+    return NextResponse.json({ progress }, { status: 200 });
+  } catch (error) {
+    console.error("Error in GET /api/progress:", error);
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
