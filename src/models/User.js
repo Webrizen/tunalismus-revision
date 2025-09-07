@@ -10,8 +10,15 @@ const UserSchema = new mongoose.Schema(
       enum: ["admin", "trainer", "student"],
       default: "student",
     },
+    status: {
+      type: String,
+      enum: ["active", "invited"],
+      default: "active",
+    },
     phone: { type: String },
     profileImage: { type: String },
+    passwordResetToken: { type: String },
+    passwordResetExpires: { type: Date },
   },
   { timestamps: true }
 );

@@ -11,6 +11,8 @@ export const connectToDB = async () => {
   }
 
   try {
+    console.log("Connecting to MongoDB...");
+    console.log("MONGODB_URI:", process.env.MONGODB_URI);
     await mongoose.connect(process.env.MONGODB_URI, {
       dbName: "library",
     });
@@ -18,5 +20,7 @@ export const connectToDB = async () => {
     console.log("✅ MongoDB connected");
   } catch (error) {
     console.error("❌ MongoDB connection failed:", error);
+    console.error("Error message:", error.message);
+    console.error("Error stack:", error.stack);
   }
 };

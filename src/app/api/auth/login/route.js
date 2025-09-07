@@ -1,0 +1,53 @@
+import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
+import * as jose from "jose";
+import User from "../../../../models/User";
+import { connectToDB } from "../../../../lib/mongodb";
+
+export async function POST(req) {
+  try {
+    await connectToDB();
+
+    const { email, password } = await req.json();
+
+    if (!email || !password) {
+      return NextResponse.json(
+        { message: "Email and password are required" },
+        { status: 400 }
+      );
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return NextResponse.json(
+        { message: "Invalid credentials" },
+        { status: 401 }
+      );
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordCorrect) {
+      return NextResponse.json(
+        { message: "Invalid credentials" },
+        { status: 401 }
+      );
+    }
+
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    const token = await new jose.SignJWT({ id: user._id, role: user.role })
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime("1d")
+      .sign(secret);
+
+    return NextResponse.json({ token }, { status: 200 });
+  } catch (error) {
+    console.error("Error in login API:", error);
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
